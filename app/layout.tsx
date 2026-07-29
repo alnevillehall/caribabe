@@ -13,34 +13,34 @@ export async function generateMetadata(): Promise<Metadata> {
   const host =
     requestHeaders.get("x-forwarded-host") ??
     requestHeaders.get("host") ??
-    "caribee.travel";
+    "caribabe.travel";
   const protocol =
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
   return {
-    title: "Caribee — The Caribbean, considered",
+    title: "Caribabe — The Caribbean, considered",
     description:
       "Discover, plan, book, and experience the most memorable places across the Caribbean.",
     metadataBase: new URL(origin),
     openGraph: {
-      title: "Caribee — Find your own rhythm",
+      title: "Caribabe — Find your own rhythm",
       description:
-        "Places with a pulse. People with a story. Go beyond the postcard with Caribee.",
+        "Places with a pulse. People with a story. Go beyond the postcard with Caribabe.",
       type: "website",
       images: [
         {
           url: `${origin}/og.png`,
           width: 1536,
           height: 864,
-          alt: "Caribee — Find your own rhythm",
+          alt: "Caribabe — Find your own rhythm",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Caribee — Find your own rhythm",
+      title: "Caribabe — Find your own rhythm",
       description:
         "A more beautiful way to discover and plan the Caribbean.",
       images: [`${origin}/og.png`],

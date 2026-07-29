@@ -127,7 +127,7 @@ const experiences: Experience[] = [
     rating: "4.98",
     reviews: 126,
     price: 170,
-    tag: "Caribee exclusive",
+    tag: "Caribabe exclusive",
     description:
       "A private, open-air dinner shaped by island ingredients, a chef’s tasting menu, and an uninterrupted sea view.",
   },
@@ -254,11 +254,11 @@ export default function Home() {
         <div className="hero-shade" />
 
         <header className="site-header">
-          <a className="brand" href="#explore" aria-label="Caribee home">
+          <a className="brand" href="#explore" aria-label="Caribabe home">
             <span className="brand-mark" aria-hidden="true">
               C
             </span>
-            <span>CARIBEE</span>
+            <span>CARIBABE</span>
           </a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
@@ -351,7 +351,7 @@ export default function Home() {
             className="search-submit"
             type="button"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search Caribee"
+            aria-label="Search Caribabe"
           >
             <Search size={22} />
             <span>Search</span>
@@ -396,7 +396,7 @@ export default function Home() {
         </div>
         <div className="intro-copy">
           <p>
-            Not a checklist. Not an all-inclusive. Caribee brings together the
+            Not a checklist. Not an all-inclusive. Caribabe brings together the
             places locals love and the moments you cannot plan for.
           </p>
           <button className="text-link" type="button" onClick={() => setSearchOpen(true)}>
@@ -657,7 +657,7 @@ export default function Home() {
           <span className="journal-number">01</span>
         </div>
         <div className="journal-copy">
-          <p className="eyebrow light">Caribee journal · Jamaica</p>
+          <p className="eyebrow light">Caribabe journal · Jamaica</p>
           <h2>The road that takes its time.</h2>
           <p>
             From the mist of the Blue Mountains to a night swim in Portland,
@@ -728,7 +728,7 @@ export default function Home() {
           <div>
             <a className="brand footer-brand" href="#explore">
               <span className="brand-mark">C</span>
-              <span>CARIBEE</span>
+              <span>CARIBABE</span>
             </a>
             <p>The Caribbean, considered.</p>
           </div>
@@ -740,7 +740,7 @@ export default function Home() {
               <a href="#journal">Journal</a>
             </div>
             <div>
-              <strong>Caribee</strong>
+              <strong>Caribabe</strong>
               <button type="button" onClick={() => notify("Our story is coming soon")}>Our story</button>
               <button type="button" onClick={() => notify("Business tools are coming soon")}>For businesses</button>
               <button type="button" onClick={() => notify("Concierge is online")}>Get help</button>
@@ -748,7 +748,7 @@ export default function Home() {
           </div>
         </div>
         <div className="footer-bottom page-shell">
-          <span>© 2026 Caribee</span>
+          <span>© 2026 Caribabe</span>
           <span>Photography from Pexels · Made with love in the Caribbean</span>
         </div>
       </footer>
@@ -785,7 +785,7 @@ export default function Home() {
             exit={{ opacity: 0 }}
             role="dialog"
             aria-modal="true"
-            aria-label="Search Caribee"
+            aria-label="Search Caribabe"
           >
             <motion.div
               className="search-modal"
@@ -797,7 +797,7 @@ export default function Home() {
               <div className="modal-top">
                 <span className="brand modal-brand">
                   <span className="brand-mark">C</span>
-                  <span>CARIBEE</span>
+                  <span>CARIBABE</span>
                 </span>
                 <button
                   className="modal-close"
