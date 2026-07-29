@@ -22,12 +22,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Caribabe — The Caribbean, considered",
     description:
-      "Discover, plan, book, and experience the most memorable places across the Caribbean.",
+      "Discover and save memorable beaches, food, culture, stays, and adventures across Jamaica.",
     metadataBase: new URL(origin),
     openGraph: {
       title: "Caribabe — Find your own rhythm",
       description:
-        "Places with a pulse. People with a story. Go beyond the postcard with Caribabe.",
+        "Explore 160 community-mapped places across Jamaica and go beyond the postcard with Caribabe.",
       type: "website",
       images: [
         {
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "Caribabe — Find your own rhythm",
       description:
-        "A more beautiful way to discover and plan the Caribbean.",
+        "A more beautiful way to discover and plan Jamaica.",
       images: [`${origin}/og.png`],
     },
   };

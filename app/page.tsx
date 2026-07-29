@@ -12,20 +12,23 @@ import {
   Clock3,
   CloudSun,
   Compass,
+  ExternalLink,
+  Globe2,
   Heart,
   Hotel,
-  LocateFixed,
+  Info,
   MapPin,
+  MapPinned,
   Menu,
   Mountain,
   Music2,
   Navigation,
   Plane,
+  Phone,
   Plus,
   Search,
   SlidersHorizontal,
   Sparkles,
-  Star,
   SunMedium,
   UserRound,
   Users,
@@ -36,6 +39,10 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import {
+  DiscoveryMap,
+  type LocationPlace,
+} from "./components/DiscoveryMap";
 
 type Experience = {
   id: number;
@@ -43,11 +50,29 @@ type Experience = {
   location: string;
   image: string;
   duration: string;
-  rating: string;
-  reviews: number;
   price: number;
   tag: string;
   description: string;
+};
+
+type LocationData = {
+  metadata: {
+    country: string;
+    source: string;
+    sourceUrl: string;
+    license: string;
+    retrievedAt: string;
+    count: number;
+    note: string;
+  };
+  locations: LocationPlace[];
+};
+
+type SearchIdea = {
+  title: string;
+  meta: string;
+  image: string;
+  place?: LocationPlace;
 };
 
 const categories: { label: string; icon: LucideIcon }[] = [
@@ -64,30 +89,34 @@ const destinations = [
   {
     name: "Jamaica",
     note: "Salt air, slow mornings",
-    count: "428 experiences",
+    count: "Live guide",
     image: "/images/curacao.jpg",
     className: "destination-jamaica",
+    live: true,
   },
   {
     name: "Saint Lucia",
     note: "Wild by nature",
-    count: "186 experiences",
+    count: "Guide coming next",
     image: "/images/st-lucia.jpg",
     className: "destination-lucia",
+    live: false,
   },
   {
     name: "Barbados",
     note: "Come for the rhythm",
-    count: "294 experiences",
+    count: "Guide coming next",
     image: "/images/barbados.jpg",
     className: "destination-barbados",
+    live: false,
   },
   {
     name: "Curaçao",
     note: "Colour at every turn",
-    count: "215 experiences",
+    count: "Guide coming next",
     image: "/images/jamaica.jpg",
     className: "destination-curacao",
+    live: false,
   },
 ];
 
@@ -98,10 +127,8 @@ const experiences: Experience[] = [
     location: "Montego Bay, Jamaica",
     image: "/images/catamaran.jpg",
     duration: "3.5 hours",
-    rating: "4.96",
-    reviews: 318,
     price: 125,
-    tag: "Guest favourite",
+    tag: "Partner preview",
     description:
       "Sail beyond the shoreline with a small local crew, swim in a quiet cove, and watch the sky turn coral over the Caribbean.",
   },
@@ -111,10 +138,8 @@ const experiences: Experience[] = [
     location: "Roseau, Dominica",
     image: "/images/waterfall.jpg",
     duration: "5 hours",
-    rating: "4.91",
-    reviews: 204,
     price: 98,
-    tag: "Rare find",
+    tag: "Partner preview",
     description:
       "Follow a naturalist through rainforest trails to a secluded swimming hole, then share a seasonal Dominican lunch in the forest.",
   },
@@ -124,16 +149,14 @@ const experiences: Experience[] = [
     location: "Soufrière, Saint Lucia",
     image: "/images/villa.jpg",
     duration: "2.5 hours",
-    rating: "4.98",
-    reviews: 126,
     price: 170,
-    tag: "Caribabe exclusive",
+    tag: "Concept preview",
     description:
       "A private, open-air dinner shaped by island ingredients, a chef’s tasting menu, and an uninterrupted sea view.",
   },
 ];
 
-const searchIdeas = [
+const searchIdeas: SearchIdea[] = [
   {
     title: "Soufrière",
     meta: "Saint Lucia · town",
@@ -156,51 +179,153 @@ const searchIdeas = [
   },
 ];
 
+const placeCategories = [
+  "All",
+  "Beaches",
+  "Nature",
+  "Culture",
+  "Food",
+  "Nightlife",
+  "Stay",
+  "Adventure",
+] as const;
+
+const categoryImage: Record<LocationPlace["category"], string> = {
+  Adventure: "/images/catamaran.jpg",
+  Beaches: "/images/st-lucia.jpg",
+  Culture: "/images/hero.jpg",
+  Food: "/images/villa.jpg",
+  Nature: "/images/waterfall.jpg",
+  Nightlife: "/images/catamaran.jpg",
+  Stay: "/images/resort.jpg",
+};
+
+function safeExternalUrl(url: string) {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
 const itinerary = [
   {
     time: "09:30",
     label: "Morning",
     title: "Blue Mountain coffee trail",
-    detail: "2 hr 30 min · confirmed",
+    detail: "2 hr 30 min · suggested",
   },
   {
     time: "13:00",
     label: "Afternoon",
     title: "Lunch at Stush in the Bush",
-    detail: "1 hr 45 min · table saved",
+    detail: "1 hr 45 min · reserve before travel",
   },
   {
     time: "17:30",
     label: "Evening",
     title: "Catamaran into golden hour",
-    detail: "3 hr 30 min · 24 min away",
+    detail: "3 hr 30 min · travel time estimate",
   },
 ];
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState("For you");
   const [saved, setSaved] = useState<Set<number>>(new Set([2]));
+  const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
   const [searchOpen, setSearchOpen] = useState(false);
   const [tripOpen, setTripOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"map" | "list">("map");
+  const [placeCategory, setPlaceCategory] =
+    useState<(typeof placeCategories)[number]>("All");
+  const [locationData, setLocationData] = useState<LocationData | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<LocationPlace | null>(null);
   const [activeExperience, setActiveExperience] = useState<Experience | null>(
     null,
   );
   const [toast, setToast] = useState<string | null>(null);
 
+  const places = locationData?.locations ?? [];
+
+  const filteredPlaces = useMemo(
+    () =>
+      placeCategory === "All"
+        ? places
+        : places.filter((place) => place.category === placeCategory),
+    [placeCategory, places],
+  );
+
   const filteredIdeas = useMemo(() => {
-    if (!query.trim()) return searchIdeas;
-    const lowered = query.toLowerCase();
-    return searchIdeas.filter(
+    const lowered = query.trim().toLowerCase();
+    const curated = lowered
+      ? searchIdeas.filter(
+          (idea) =>
+            idea.title.toLowerCase().includes(lowered) ||
+            idea.meta.toLowerCase().includes(lowered),
+        )
+      : searchIdeas.slice(0, 2);
+    const realPlaces = places
+      .filter(
+        (place) =>
+          !lowered ||
+          place.name.toLowerCase().includes(lowered) ||
+          place.category.toLowerCase().includes(lowered) ||
+          place.kind.toLowerCase().includes(lowered) ||
+          place.parish?.toLowerCase().includes(lowered),
+      )
+      .slice(0, lowered ? 8 : 4)
+      .map<SearchIdea>((place) => ({
+        title: place.name,
+        meta: `${place.kind} · ${place.parish ?? "Jamaica"}`,
+        image: categoryImage[place.category],
+        place,
+      }));
+
+    return [...realPlaces, ...curated].slice(0, 10).filter(
       (idea) =>
         idea.title.toLowerCase().includes(lowered) ||
-        idea.meta.toLowerCase().includes(lowered),
+        idea.meta.toLowerCase().includes(lowered) ||
+        !lowered,
     );
-  }, [query]);
+  }, [places, query]);
 
   const overlayOpen =
-    searchOpen || tripOpen || Boolean(activeExperience);
+    searchOpen ||
+    tripOpen ||
+    Boolean(activeExperience) ||
+    Boolean(selectedPlace);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("/data/jamaica-locations.json")
+      .then((response) => {
+        if (!response.ok) throw new Error("Location catalogue unavailable");
+        return response.json() as Promise<LocationData>;
+      })
+      .then((data) => {
+        if (active) setLocationData(data);
+      })
+      .catch(() => {
+        if (active) setLocationData(null);
+      });
+
+    try {
+      const storedExperiences = window.localStorage.getItem(
+        "caribabe:saved-experiences",
+      );
+      const storedPlaces = window.localStorage.getItem("caribabe:saved-places");
+      if (storedExperiences) {
+        setSaved(new Set(JSON.parse(storedExperiences) as number[]));
+      }
+      if (storedPlaces) {
+        setSavedPlaces(new Set(JSON.parse(storedPlaces) as string[]));
+      }
+    } catch {
+      // Saved items simply start fresh when browser storage is unavailable.
+    }
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = overlayOpen ? "hidden" : "";
@@ -215,6 +340,7 @@ export default function Home() {
         setSearchOpen(false);
         setTripOpen(false);
         setActiveExperience(null);
+        setSelectedPlace(null);
       }
     };
     window.addEventListener("keydown", onKeyDown);
@@ -236,11 +362,64 @@ export default function Home() {
       notify("Saved to your Caribbean list");
     }
     setSaved(next);
+    try {
+      window.localStorage.setItem(
+        "caribabe:saved-experiences",
+        JSON.stringify([...next]),
+      );
+    } catch {
+      // The UI still works when private browsing blocks local storage.
+    }
   };
 
-  const exploreDestination = (name: string) => {
-    setQuery(name);
-    setSearchOpen(true);
+  const togglePlaceSaved = (place: LocationPlace) => {
+    const next = new Set(savedPlaces);
+    if (next.has(place.id)) {
+      next.delete(place.id);
+      notify("Removed from your Jamaica collection");
+    } else {
+      next.add(place.id);
+      notify(`${place.name} saved on this device`);
+    }
+    setSavedPlaces(next);
+    try {
+      window.localStorage.setItem(
+        "caribabe:saved-places",
+        JSON.stringify([...next]),
+      );
+    } catch {
+      // The UI still works when private browsing blocks local storage.
+    }
+  };
+
+  const chooseCategory = (label: string) => {
+    setActiveCategory(label);
+    const mapping: Record<string, (typeof placeCategories)[number]> = {
+      Beaches: "Beaches",
+      Food: "Food",
+      Events: "Nightlife",
+      Stay: "Stay",
+      Adventure: "Adventure",
+      Rentals: "Adventure",
+      "For you": "All",
+    };
+    setPlaceCategory(mapping[label] ?? "All");
+    if (label !== "For you") {
+      document
+        .getElementById("nearby")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const exploreDestination = (name: string, live: boolean) => {
+    if (!live) {
+      notify(`${name} is on the Caribabe roadmap`);
+      return;
+    }
+    setPlaceCategory("All");
+    document
+      .getElementById("nearby")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -271,10 +450,10 @@ export default function Home() {
           </nav>
 
           <div className="header-tools">
-            <div className="weather-pill" aria-label="Kingston weather">
+            <div className="weather-pill" aria-label="Exploring Jamaica">
               <SunMedium size={17} />
-              <span>Kingston</span>
-              <strong>29°</strong>
+              <span>Jamaica</span>
+              <strong>Explore</strong>
             </div>
             <button
               className="round-button profile-button"
@@ -368,7 +547,7 @@ export default function Home() {
                 activeCategory === label ? "active" : ""
               }`}
               key={label}
-              onClick={() => setActiveCategory(label)}
+              onClick={() => chooseCategory(label)}
             >
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>
@@ -422,7 +601,9 @@ export default function Home() {
               type="button"
               className={`destination-card ${destination.className}`}
               key={destination.name}
-              onClick={() => exploreDestination(destination.name)}
+              onClick={() =>
+                exploreDestination(destination.name, destination.live)
+              }
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
@@ -447,8 +628,12 @@ export default function Home() {
         <div className="page-shell">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">This week&apos;s short list</p>
+              <p className="eyebrow">Partner experience previews</p>
               <h2>Worth leaving the beach for.</h2>
+              <p className="section-disclaimer">
+                A look at the collection we are building. Prices, reviews, and
+                availability go live only after each partner is verified.
+              </p>
             </div>
             <button className="quiet-link" type="button" onClick={() => setSearchOpen(true)}>
               See every experience <ArrowRight size={17} />
@@ -501,15 +686,14 @@ export default function Home() {
                   <strong>{experience.title}</strong>
                   <span className="experience-details">
                     <span>
-                      <Star size={14} fill="currentColor" /> {experience.rating}
-                      <small>({experience.reviews})</small>
+                      <Sparkles size={14} /> Partner preview
                     </span>
                     <span>
                       <Clock3 size={14} /> {experience.duration}
                     </span>
                   </span>
                   <span className="experience-price">
-                    From <b>${experience.price}</b> / person
+                    Indicative from <b>${experience.price}</b> / person
                   </span>
                 </button>
               </motion.article>
@@ -520,15 +704,16 @@ export default function Home() {
 
       <section className="nearby-section page-shell" id="nearby">
         <div className="nearby-copy">
-          <p className="eyebrow">Right where you are</p>
+          <p className="eyebrow">Community-mapped Jamaica</p>
           <h2>
             Let the island
             <br />
             surprise you.
           </h2>
           <p>
-            Live music around the corner. A family-run kitchen down the road.
-            One last swim before sunset.
+            Beaches, waterfalls, museums, independent kitchens, stays, and
+            nightlife—mapped from open data and ready to explore without a
+            paid places API.
           </p>
           <div className="view-switch" aria-label="Nearby view">
             <button
@@ -546,6 +731,30 @@ export default function Home() {
               List
             </button>
           </div>
+          <div className="place-filter-row" aria-label="Filter Jamaican places">
+            {placeCategories.map((category) => (
+              <button
+                type="button"
+                key={category}
+                className={placeCategory === category ? "active" : ""}
+                onClick={() => setPlaceCategory(category)}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+          <p className="place-source-note">
+            <Info size={14} />
+            {locationData
+              ? `${locationData.metadata.count} places · refreshed ${new Date(
+                  locationData.metadata.retrievedAt,
+                ).toLocaleDateString("en-JM", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}`
+              : "Loading the Jamaica catalogue"}
+          </p>
         </div>
 
         <div className="discovery-panel">
@@ -553,101 +762,101 @@ export default function Home() {
             {view === "map" ? (
               <motion.div
                 key="map"
-                className="map-surface"
+                className="real-map-panel"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <span className="map-label label-water">Caribbean Sea</span>
-                <span className="map-label label-town">Portland Parish</span>
-                <span className="map-road road-one" />
-                <span className="map-road road-two" />
-                <button
-                  type="button"
-                  className="map-pin pin-one"
-                  aria-label="Reach Falls"
-                  onClick={() => notify("Reach Falls · 28 minutes away")}
-                >
-                  <Waves size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="map-pin pin-two food-pin"
-                  aria-label="Mille Fleurs restaurant"
-                  onClick={() => notify("Mille Fleurs · open until 10 PM")}
-                >
-                  <Utensils size={16} />
-                </button>
-                <button
-                  type="button"
-                  className="map-pin pin-three music-pin"
-                  aria-label="Live music"
-                  onClick={() => notify("Live music begins at 8 PM")}
-                >
-                  <Music2 size={16} />
-                </button>
-                <span className="you-are-here">
-                  <span />
-                </span>
-                <button
-                  className="locate-button"
-                  type="button"
-                  aria-label="Locate me"
-                  onClick={() => notify("Map centered on your area")}
-                >
-                  <LocateFixed size={19} />
-                </button>
-                <article className="map-place-card">
-                  <img src="/images/resort.jpg" alt="" />
-                  <div>
-                    <small>12 min away · open now</small>
-                    <strong>Frenchman&apos;s Cove</strong>
-                    <span>
-                      <Star size={13} fill="currentColor" /> 4.8 · Quiet beach
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="View Frenchman's Cove"
-                    onClick={() => notify("Added Frenchman’s Cove to your day")}
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </article>
+                <DiscoveryMap
+                  places={filteredPlaces}
+                  selectedPlace={selectedPlace}
+                  onSelect={setSelectedPlace}
+                />
+                <div className="map-data-chip">
+                  <MapPinned size={16} />
+                  <span>
+                    <strong>{filteredPlaces.length}</strong>
+                    {placeCategory === "All"
+                      ? " places across Jamaica"
+                      : ` ${placeCategory.toLowerCase()} places`}
+                  </span>
+                </div>
               </motion.div>
             ) : (
               <motion.div
                 key="list"
-                className="nearby-list"
+                className="nearby-list real-place-list"
                 initial={{ opacity: 0, x: 12 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -12 }}
               >
-                {[
-                  ["Frenchman’s Cove", "Quiet beach · 12 min", "/images/resort.jpg"],
-                  ["Mille Fleurs", "Caribbean kitchen · 18 min", "/images/villa.jpg"],
-                  ["Reach Falls", "Wild swimming · 28 min", "/images/waterfall.jpg"],
-                ].map(([name, meta, image]) => (
-                  <button
-                    type="button"
-                    className="nearby-list-item"
-                    key={name}
-                    onClick={() => notify(`${name} added to your day`)}
-                  >
-                    <img src={image} alt="" />
-                    <span>
-                      <small>{meta}</small>
-                      <strong>{name}</strong>
-                      <span>
-                        <Star size={13} fill="currentColor" /> 4.8
-                      </span>
+                {filteredPlaces.slice(0, 60).map((place) => (
+                  <article className="nearby-list-item" key={place.id}>
+                    <span
+                      className={`place-category-tile category-${place.category.toLowerCase()}`}
+                    >
+                      <MapPin size={21} />
+                      <small>{place.category}</small>
                     </span>
-                    <ChevronRight size={19} />
-                  </button>
+                    <button
+                      type="button"
+                      className="place-list-main"
+                      onClick={() => setSelectedPlace(place)}
+                    >
+                      <span>
+                        <small>
+                          {place.kind} · {place.parish ?? "Jamaica"}
+                        </small>
+                        <strong>{place.name}</strong>
+                        <span>
+                          {place.cuisine ??
+                            place.openingHours ??
+                            "Community-mapped details"}
+                        </span>
+                      </span>
+                      <ChevronRight size={19} />
+                    </button>
+                    <button
+                      type="button"
+                      className={`place-list-save ${
+                        savedPlaces.has(place.id) ? "saved" : ""
+                      }`}
+                      onClick={() => togglePlaceSaved(place)}
+                      aria-label={
+                        savedPlaces.has(place.id)
+                          ? `Remove ${place.name} from saved`
+                          : `Save ${place.name}`
+                      }
+                    >
+                      <Heart
+                        size={17}
+                        fill={savedPlaces.has(place.id) ? "currentColor" : "none"}
+                      />
+                    </button>
+                  </article>
                 ))}
+                {filteredPlaces.length === 0 && (
+                  <div className="place-list-empty">
+                    <MapPin size={26} />
+                    <strong>No places in this view yet.</strong>
+                    <span>Try another category.</span>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+        <div className="osm-attribution">
+          Data ©{" "}
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noreferrer"
+          >
+            OpenStreetMap contributors
+          </a>
+          , available under ODbL 1.0. Place details may change—verify before
+          travelling.
         </div>
       </section>
 
@@ -749,7 +958,16 @@ export default function Home() {
         </div>
         <div className="footer-bottom page-shell">
           <span>© 2026 Caribabe</span>
-          <span>Photography from Pexels · Made with love in the Caribbean</span>
+          <span>
+            Photography from Pexels · Place data ©{" "}
+            <a
+              href="https://www.openstreetmap.org/copyright"
+              target="_blank"
+              rel="noreferrer"
+            >
+              OpenStreetMap contributors
+            </a>
+          </span>
         </div>
       </footer>
 
@@ -766,7 +984,12 @@ export default function Home() {
           <CalendarDays size={20} />
           <span>Bookings</span>
         </button>
-        <button type="button" onClick={() => notify(`${saved.size} saved experiences`)}>
+        <button
+          type="button"
+          onClick={() =>
+            notify(`${saved.size + savedPlaces.size} saved places and experiences`)
+          }
+        >
           <Bookmark size={20} />
           <span>Saved</span>
         </button>
@@ -829,16 +1052,22 @@ export default function Home() {
               </div>
               <div className="search-modal-content">
                 <p className="eyebrow">
-                  {query ? "Suggested for you" : "A few beautiful ideas"}
+                  {query
+                    ? "Real places and curated ideas"
+                    : "Start with Jamaica"}
                 </p>
                 <div className="search-suggestions">
                   {filteredIdeas.map((idea) => (
                     <button
                       type="button"
-                      key={idea.title}
+                      key={idea.place?.id ?? idea.title}
                       onClick={() => {
                         setSearchOpen(false);
-                        notify(`${idea.title} is ready to explore`);
+                        if (idea.place) {
+                          setSelectedPlace(idea.place);
+                        } else {
+                          notify(`${idea.title} is ready to explore`);
+                        }
                       }}
                     >
                       <img src={idea.image} alt="" />
@@ -856,6 +1085,154 @@ export default function Home() {
                       <span>Try an island, beach, restaurant, or experience.</span>
                     </div>
                   )}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {selectedPlace && (
+          <motion.div
+            className="overlay detail-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={selectedPlace.name}
+          >
+            <motion.div
+              className="place-modal"
+              initial={{ y: "8%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "6%", opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 240 }}
+            >
+              <button
+                className="detail-close"
+                type="button"
+                onClick={() => setSelectedPlace(null)}
+                aria-label="Close place"
+              >
+                <X size={20} />
+              </button>
+              <div
+                className={`place-modal-visual category-${selectedPlace.category.toLowerCase()}`}
+              >
+                <span className="place-modal-grid" />
+                <span className="place-modal-pin">
+                  <MapPin size={30} />
+                </span>
+                <span className="place-modal-category">
+                  {selectedPlace.category}
+                </span>
+                <span className="place-modal-coordinates">
+                  {selectedPlace.lat.toFixed(3)},{" "}
+                  {selectedPlace.lng.toFixed(3)}
+                </span>
+              </div>
+              <div className="place-modal-content">
+                <span className="experience-meta">
+                  <MapPin size={14} />
+                  {selectedPlace.kind} · {selectedPlace.parish ?? "Jamaica"}
+                </span>
+                <h2>{selectedPlace.name}</h2>
+                <p>
+                  {selectedPlace.description ??
+                    `A community-mapped ${selectedPlace.kind.toLowerCase()} in ${
+                      selectedPlace.parish ?? "Jamaica"
+                    }. Save it for your trip or open directions to plan your visit.`}
+                </p>
+
+                <div className="place-facts">
+                  {selectedPlace.address && (
+                    <span>
+                      <MapPinned size={17} />
+                      <small>Address</small>
+                      <strong>{selectedPlace.address}</strong>
+                    </span>
+                  )}
+                  {selectedPlace.openingHours && (
+                    <span>
+                      <Clock3 size={17} />
+                      <small>Mapped hours</small>
+                      <strong>{selectedPlace.openingHours}</strong>
+                    </span>
+                  )}
+                  {selectedPlace.cuisine && (
+                    <span>
+                      <Utensils size={17} />
+                      <small>Cuisine</small>
+                      <strong>{selectedPlace.cuisine}</strong>
+                    </span>
+                  )}
+                  {selectedPlace.phone && (
+                    <a href={`tel:${selectedPlace.phone.replace(/[^\d+]/g, "")}`}>
+                      <Phone size={17} />
+                      <small>Phone</small>
+                      <strong>{selectedPlace.phone}</strong>
+                    </a>
+                  )}
+                  {selectedPlace.website && (
+                    <a
+                      href={safeExternalUrl(selectedPlace.website)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <Globe2 size={17} />
+                      <small>Website</small>
+                      <strong>Visit official site</strong>
+                    </a>
+                  )}
+                  {selectedPlace.wheelchair && (
+                    <span>
+                      <Info size={17} />
+                      <small>Accessibility</small>
+                      <strong>
+                        Wheelchair: {selectedPlace.wheelchair.replaceAll("_", " ")}
+                      </strong>
+                    </span>
+                  )}
+                </div>
+
+                <div className="place-actions">
+                  <a
+                    className="primary-place-action"
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPlace.lat},${selectedPlace.lng}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Get directions <Navigation size={18} />
+                  </a>
+                  <button
+                    type="button"
+                    className={savedPlaces.has(selectedPlace.id) ? "saved" : ""}
+                    onClick={() => togglePlaceSaved(selectedPlace)}
+                  >
+                    <Heart
+                      size={18}
+                      fill={
+                        savedPlaces.has(selectedPlace.id)
+                          ? "currentColor"
+                          : "none"
+                      }
+                    />
+                    {savedPlaces.has(selectedPlace.id) ? "Saved" : "Save place"}
+                  </button>
+                </div>
+                <div className="place-data-note">
+                  <Info size={14} />
+                  <span>
+                    Community data can be incomplete. Confirm hours, fees, and
+                    access before travelling.{" "}
+                    <a
+                      href={selectedPlace.osmUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      View source <ExternalLink size={12} />
+                    </a>
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -899,8 +1276,7 @@ export default function Home() {
                   <h2>{activeExperience.title}</h2>
                   <div className="detail-rating">
                     <span>
-                      <Star size={15} fill="currentColor" />{" "}
-                      {activeExperience.rating} ({activeExperience.reviews} reviews)
+                      <Sparkles size={15} /> Partner preview
                     </span>
                     <span>
                       <Clock3 size={15} /> {activeExperience.duration}
@@ -910,32 +1286,33 @@ export default function Home() {
                   <div className="detail-includes">
                     <strong>What makes it special</strong>
                     <span>
-                      <Check size={16} /> Small group, never more than eight
+                      <Check size={16} /> Proposed small-group format
                     </span>
                     <span>
-                      <Check size={16} /> Hosted by a local expert
+                      <Check size={16} /> Local host verification required
                     </span>
                     <span>
-                      <Check size={16} /> Free cancellation up to 24 hours
+                      <Check size={16} /> Final terms published before booking
                     </span>
                   </div>
                 </div>
                 <aside className="booking-card">
                   <span>
-                    From <strong>${activeExperience.price}</strong> / person
+                    Indicative from <strong>${activeExperience.price}</strong> /
+                    person
                   </span>
                   <button type="button" className="booking-field">
                     <CalendarDays size={18} />
                     <span>
                       <small>Date</small>
-                      <strong>Fri, Aug 14</strong>
+                      <strong>Availability not live</strong>
                     </span>
                   </button>
                   <button type="button" className="booking-field">
                     <Users size={18} />
                     <span>
                       <small>Guests</small>
-                      <strong>2 travellers</strong>
+                      <strong>Set during booking</strong>
                     </span>
                   </button>
                   <button
@@ -943,12 +1320,12 @@ export default function Home() {
                     className="primary-book-button"
                     onClick={() => {
                       setActiveExperience(null);
-                      notify("Beautiful choice — your spot is held");
+                      notify("Bookings open after partner verification");
                     }}
                   >
-                    Check availability <ArrowRight size={18} />
+                    Bookings coming soon <ArrowRight size={18} />
                   </button>
-                  <small>You won&apos;t be charged yet</small>
+                  <small>No reservation or charge is being made.</small>
                 </aside>
               </div>
             </motion.div>
