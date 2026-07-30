@@ -1,0 +1,36 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 760 180"
+  role="img"
+  aria-labelledby="go-bjoun-logo-title go-bjoun-logo-description"
+>
+  <title id="go-bjoun-logo-title">go bjoun</title>
+  <desc id="go-bjoun-logo-description">
+    A flight path shaped like a subtle letter G rises into an aircraft beside
+    the go bjoun wordmark.
+  </desc>
+  <g transform="translate(8 10)">
+    <path
+      d="M127 77C109 61 76 58 53 70C29 83 25 106 46 120C64 132 96 132 119 119C129 113 137 104 141 96C124 101 103 102 84 97C109 92 132 79 153 61"
+      fill="none"
+      stroke="#111916"
+      stroke-width="6.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M149 57.5H164.5L158 47.5L162.75 46.25L174.5 57.5H187.25C191.5 57.5 193.25 59.25 193.25 60.5C193.25 61.75 191.5 63.5 187.25 63.5H174.5L162.75 74.75L158 73.5L164.5 63.5H149L154.25 60.5L149 57.5Z"
+      fill="#111916"
+      transform="rotate(-24 153 61)"
+    />
+  </g>
+  <text
+    x="238"
+    y="116"
+    fill="#111916"
+    font-family="Geist, Avenir Next, Avenir, Helvetica Neue, Arial, sans-serif"
+    font-size="72"
+    font-weight="440"
+    letter-spacing="-2.25"
+  >go bjoun</text>
+</svg>
