@@ -71,8 +71,13 @@ export function DiscoveryMap({
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  placesRef.current = places;
-  onSelectRef.current = onSelect;
+  useEffect(() => {
+    placesRef.current = places;
+  }, [places]);
+
+  useEffect(() => {
+    onSelectRef.current = onSelect;
+  }, [onSelect]);
 
   useEffect(() => {
     let cancelled = false;

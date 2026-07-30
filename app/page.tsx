@@ -38,6 +38,9 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   DiscoveryMap,
@@ -206,9 +209,11 @@ function safeExternalUrl(url: string) {
 
 function BrandLogo({ light = false }: { light?: boolean }) {
   return (
-    <img
+    <Image
       src="/brand/go-bjoun-logo.svg"
       alt="Go Bjoun"
+      width={760}
+      height={180}
       className={`brand-logo ${light ? "brand-logo-light" : ""}`}
     />
   );
@@ -236,6 +241,7 @@ const itinerary = [
 ];
 
 export default function Home() {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("For you");
   const [saved, setSaved] = useState<Set<number>>(new Set([2]));
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
@@ -252,7 +258,7 @@ export default function Home() {
   );
   const [toast, setToast] = useState<string | null>(null);
 
-  const places = locationData?.locations ?? [];
+  const places = useMemo(() => locationData?.locations ?? [], [locationData]);
 
   const filteredPlaces = useMemo(
     () =>
@@ -317,20 +323,22 @@ export default function Home() {
         if (active) setLocationData(null);
       });
 
-    try {
-      const storedExperiences = window.localStorage.getItem(
-        "go-bjoun:saved-experiences",
-      );
-      const storedPlaces = window.localStorage.getItem("go-bjoun:saved-places");
-      if (storedExperiences) {
-        setSaved(new Set(JSON.parse(storedExperiences) as number[]));
+    queueMicrotask(() => {
+      try {
+        const storedExperiences = window.localStorage.getItem(
+          "go-bjoun:saved-experiences",
+        );
+        const storedPlaces = window.localStorage.getItem("go-bjoun:saved-places");
+        if (storedExperiences) {
+          setSaved(new Set(JSON.parse(storedExperiences) as number[]));
+        }
+        if (storedPlaces) {
+          setSavedPlaces(new Set(JSON.parse(storedPlaces) as string[]));
+        }
+      } catch {
+        // Saved items simply start fresh when browser storage is unavailable.
       }
-      if (storedPlaces) {
-        setSavedPlaces(new Set(JSON.parse(storedPlaces) as string[]));
-      }
-    } catch {
-      // Saved items simply start fresh when browser storage is unavailable.
-    }
+    });
 
     return () => {
       active = false;
@@ -435,9 +443,13 @@ export default function Home() {
   return (
     <main>
       <section className="hero" id="explore">
-        <img
+        <Image
           src="/images/st-lucia.jpg"
           alt="Palm-lined Caribbean beach seen from above"
+          width={1600}
+          height={1200}
+          sizes="100vw"
+          priority
           className="hero-image"
         />
         <div className="hero-shade" />
@@ -448,12 +460,10 @@ export default function Home() {
           </a>
 
           <nav className="desktop-nav" aria-label="Primary navigation">
-            <a href="#discover">Discover</a>
-            <button type="button" onClick={() => setTripOpen(true)}>
-              Plan a trip
-            </button>
+            <Link href="/discover">Discover</Link>
+            <Link href="/trips">Plan a trip</Link>
             <a href="#nearby">Near me</a>
-            <a href="#journal">Stories</a>
+            <Link href="/journal">Stories</Link>
           </nav>
 
           <div className="header-tools">
@@ -466,7 +476,7 @@ export default function Home() {
               className="round-button profile-button"
               type="button"
               aria-label="Open profile"
-              onClick={() => notify("Your travel passport is ready")}
+              onClick={() => router.push("/account")}
             >
               <UserRound size={19} />
             </button>
@@ -474,7 +484,7 @@ export default function Home() {
               className="round-button mobile-menu"
               type="button"
               aria-label="Open menu"
-              onClick={() => setSearchOpen(true)}
+              onClick={() => router.push("/discover")}
             >
               <Menu size={20} />
             </button>
@@ -585,7 +595,7 @@ export default function Home() {
             Not a checklist. Not an all-inclusive. Go Bjoun brings together the
             places locals love and the moments you cannot plan for.
           </p>
-          <button className="text-link" type="button" onClick={() => setSearchOpen(true)}>
+          <button className="text-link" type="button" onClick={() => router.push("/discover")}>
             Start exploring <ArrowUpRight size={17} />
           </button>
         </div>
@@ -597,7 +607,7 @@ export default function Home() {
             <p className="eyebrow">Island by island</p>
             <h2>Where the mood takes you.</h2>
           </div>
-          <button className="quiet-link" type="button" onClick={() => setSearchOpen(true)}>
+          <button className="quiet-link" type="button" onClick={() => router.push("/discover")}>
             View all islands <ArrowRight size={17} />
           </button>
         </div>
@@ -616,7 +626,13 @@ export default function Home() {
               viewport={{ once: true, amount: 0.2 }}
               transition={{ delay: index * 0.06, duration: 0.5 }}
             >
-              <img src={destination.image} alt="" />
+              <Image
+                src={destination.image}
+                alt=""
+                width={800}
+                height={1000}
+                sizes="(max-width: 720px) 85vw, 25vw"
+              />
               <span className="card-gradient" />
               {index === 0 && <span className="trending-badge">Trending now</span>}
               <span className="destination-content">
@@ -638,11 +654,11 @@ export default function Home() {
               <p className="eyebrow">Partner experience previews</p>
               <h2>Worth leaving the beach for.</h2>
               <p className="section-disclaimer">
-                A look at the collection we are building. Prices, reviews, and
-                availability go live only after each partner is verified.
+                Preview the complete demo journey, including a smooth simulated
+                checkout. No reservation or charge is made.
               </p>
             </div>
-            <button className="quiet-link" type="button" onClick={() => setSearchOpen(true)}>
+            <button className="quiet-link" type="button" onClick={() => router.push("/discover")}>
               See every experience <ArrowRight size={17} />
             </button>
           </div>
@@ -663,7 +679,13 @@ export default function Home() {
                   onClick={() => setActiveExperience(experience)}
                   aria-label={`View ${experience.title}`}
                 >
-                  <img src={experience.image} alt="" />
+                  <Image
+                    src={experience.image}
+                    alt=""
+                    width={1200}
+                    height={800}
+                    sizes="(max-width: 720px) 92vw, 34vw"
+                  />
                   <span className="experience-tag">{experience.tag}</span>
                 </button>
                 <button
@@ -869,7 +891,13 @@ export default function Home() {
 
       <section className="journal-section" id="journal">
         <div className="journal-image">
-          <img src="/images/hero.jpg" alt="Caribbean coastline from the air" />
+          <Image
+            src="/images/hero.jpg"
+            alt="Caribbean coastline from the air"
+            width={1200}
+            height={900}
+            sizes="(max-width: 800px) 100vw, 50vw"
+          />
           <span className="journal-number">01</span>
         </div>
         <div className="journal-copy">
@@ -882,7 +910,7 @@ export default function Home() {
           <button
             type="button"
             className="journal-link"
-            onClick={() => notify("Story saved for your next slow Sunday")}
+            onClick={() => router.push("/journal/blue-mountain-mornings")}
           >
             Read the story <ArrowUpRight size={18} />
           </button>
@@ -909,7 +937,7 @@ export default function Home() {
             <button
               type="button"
               className="light-button"
-              onClick={() => setTripOpen(true)}
+              onClick={() => router.push("/trips")}
             >
               Build a trip <Plus size={18} />
             </button>
@@ -950,15 +978,15 @@ export default function Home() {
           <div className="footer-links">
             <div>
               <strong>Explore</strong>
-              <a href="#discover">Destinations</a>
+              <Link href="/discover">Destinations</Link>
               <a href="#nearby">Near you</a>
-              <a href="#journal">Journal</a>
+              <Link href="/journal">Journal</Link>
             </div>
             <div>
               <strong>Go Bjoun</strong>
-              <button type="button" onClick={() => notify("Our story is coming soon")}>Our story</button>
-              <button type="button" onClick={() => notify("Business tools are coming soon")}>For businesses</button>
-              <button type="button" onClick={() => notify("Concierge is online")}>Get help</button>
+              <Link href="/about">Our story</Link>
+              <Link href="/partner">For businesses</Link>
+              <Link href="/support">Get help</Link>
             </div>
           </div>
         </div>
@@ -982,27 +1010,22 @@ export default function Home() {
           <Compass size={20} />
           <span>Explore</span>
         </a>
-        <button type="button" onClick={() => setTripOpen(true)}>
+        <Link href="/trips">
           <Plane size={20} />
           <span>Trips</span>
-        </button>
-        <button type="button" onClick={() => notify("No bookings yet")}>
+        </Link>
+        <Link href="/account">
           <CalendarDays size={20} />
           <span>Bookings</span>
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            notify(`${saved.size + savedPlaces.size} saved places and experiences`)
-          }
-        >
+        </Link>
+        <Link href="/saved">
           <Bookmark size={20} />
           <span>Saved</span>
-        </button>
-        <button type="button" onClick={() => notify("Your travel passport is ready")}>
+        </Link>
+        <Link href="/account">
           <UserRound size={20} />
           <span>Profile</span>
-        </button>
+        </Link>
       </nav>
 
       <AnimatePresence>
@@ -1071,11 +1094,17 @@ export default function Home() {
                         if (idea.place) {
                           setSelectedPlace(idea.place);
                         } else {
-                          notify(`${idea.title} is ready to explore`);
+                          router.push("/discover");
                         }
                       }}
                     >
-                      <img src={idea.image} alt="" />
+                      <Image
+                        src={idea.image}
+                        alt=""
+                        width={240}
+                        height={180}
+                        sizes="72px"
+                      />
                       <span>
                         <strong>{idea.title}</strong>
                         <small>{idea.meta}</small>
@@ -1270,7 +1299,13 @@ export default function Home() {
                 <X size={20} />
               </button>
               <div className="detail-image">
-                <img src={activeExperience.image} alt="" />
+                <Image
+                  src={activeExperience.image}
+                  alt=""
+                  width={1200}
+                  height={800}
+                  sizes="(max-width: 780px) 100vw, 44vw"
+                />
                 <span>{activeExperience.tag}</span>
               </div>
               <div className="detail-content">
@@ -1306,29 +1341,30 @@ export default function Home() {
                     Indicative from <strong>${activeExperience.price}</strong> /
                     person
                   </span>
-                  <button type="button" className="booking-field">
+                  <div className="booking-field">
                     <CalendarDays size={18} />
                     <span>
                       <small>Date</small>
-                      <strong>Availability not live</strong>
+                      <strong>Choose during checkout</strong>
                     </span>
-                  </button>
-                  <button type="button" className="booking-field">
+                  </div>
+                  <div className="booking-field">
                     <Users size={18} />
                     <span>
                       <small>Guests</small>
                       <strong>Set during booking</strong>
                     </span>
-                  </button>
+                  </div>
                   <button
                     type="button"
                     className="primary-book-button"
                     onClick={() => {
+                      const experienceId = activeExperience.id;
                       setActiveExperience(null);
-                      notify("Bookings open after partner verification");
+                      router.push(`/booking?experience=${experienceId}`);
                     }}
                   >
-                    Bookings coming soon <ArrowRight size={18} />
+                    Continue to demo booking <ArrowRight size={18} />
                   </button>
                   <small>No reservation or charge is being made.</small>
                 </aside>
@@ -1418,7 +1454,10 @@ export default function Home() {
               <button
                 type="button"
                 className="drawer-cta"
-                onClick={() => notify("Your itinerary is ready to share")}
+                onClick={() => {
+                  setTripOpen(false);
+                  router.push("/trips");
+                }}
               >
                 View full itinerary <ArrowRight size={18} />
               </button>

@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", {
+    new Request(new URL(pathname, "http://localhost/"), {
       headers: { accept: "text/html", host: "bjoun.com" },
     }),
     {
@@ -34,8 +34,34 @@ test("server-renders Go Bjoun's public discovery experience", async () => {
   assert.match(html, /Community-mapped Jamaica/);
   assert.match(html, /Partner experience previews/);
   assert.match(html, /OpenStreetMap contributors/);
-  assert.match(html, /availability go live only after each partner is verified/);
+  assert.match(html, /smooth simulated checkout/i);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
+});
+
+test("server-renders every public demo route", async () => {
+  const routes = [
+    "/discover",
+    "/saved",
+    "/trips",
+    "/auth",
+    "/booking?experience=1",
+    "/account",
+    "/journal",
+    "/journal/kingston-after-dark",
+    "/about",
+    "/support",
+    "/partner",
+  ];
+
+  for (const route of routes) {
+    const response = await render(route);
+    assert.equal(response.status, 200, `${route} should render successfully`);
+    assert.match(
+      response.headers.get("content-type") ?? "",
+      /^text\/html\b/i,
+      `${route} should return HTML`,
+    );
+  }
 });
 
 test("ships a curated, attributed and refreshable Jamaica catalogue", async () => {

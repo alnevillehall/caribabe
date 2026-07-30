@@ -234,7 +234,11 @@ function curate(elements) {
         )
         .slice(0, limits[category]),
     )
-    .map(({ _score, ...place }) => place)
+    .map((place) => {
+      const cleanPlace = { ...place };
+      delete cleanPlace._score;
+      return cleanPlace;
+    })
     .sort(
       (a, b) =>
         a.category.localeCompare(b.category) ||
