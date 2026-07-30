@@ -13,34 +13,34 @@ export async function generateMetadata(): Promise<Metadata> {
   const host =
     requestHeaders.get("x-forwarded-host") ??
     requestHeaders.get("host") ??
-    "caribabe.travel";
+    "bjoun.com";
   const protocol =
     requestHeaders.get("x-forwarded-proto") ??
     (host.startsWith("localhost") ? "http" : "https");
   const origin = `${protocol}://${host}`;
 
   return {
-    title: "Caribabe — The Caribbean, considered",
+    title: "Go Bjoun — Where will you go?",
     description:
       "Discover and save memorable beaches, food, culture, stays, and adventures across Jamaica.",
     metadataBase: new URL(origin),
     openGraph: {
-      title: "Caribabe — Find your own rhythm",
+      title: "Go Bjoun — Where will you go?",
       description:
-        "Explore 160 community-mapped places across Jamaica and go beyond the postcard with Caribabe.",
+        "Explore 160 community-mapped places across Jamaica and go beyond the postcard with Go Bjoun.",
       type: "website",
       images: [
         {
           url: `${origin}/og.png`,
-          width: 1536,
-          height: 864,
-          alt: "Caribabe — Find your own rhythm",
+          width: 1672,
+          height: 941,
+          alt: "Go Bjoun — Where will you go?",
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: "Caribabe — Find your own rhythm",
+      title: "Go Bjoun — Where will you go?",
       description:
         "A more beautiful way to discover and plan Jamaica.",
       images: [`${origin}/og.png`],

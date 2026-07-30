@@ -248,7 +248,7 @@ async function main() {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       "User-Agent":
-        "CaribabeLocationImporter/1.0 (+https://caribabe.travel; contact: hello@caribabe.travel)",
+        "GoBjounLocationImporter/1.0 (+https://bjoun.com; contact: hello@bjoun.com)",
     },
     body: new URLSearchParams({ data: query }),
     signal: AbortSignal.timeout(100_000),

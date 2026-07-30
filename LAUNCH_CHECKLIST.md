@@ -1,10 +1,10 @@
-# Caribabe launch handoff
+# Go Bjoun launch handoff
 
 Updated: 29 July 2026
 
 ## What is ready now
 
-Caribabe is ready to launch as a public **Jamaica discovery beta**:
+Go Bjoun is ready to launch as a public **Jamaica discovery beta**:
 
 - 160 real Jamaican locations across beaches, nature, culture, food, nightlife,
   stays, and adventure.
@@ -50,7 +50,7 @@ attribution. Do not scrape those fields from a travel marketplace.
 ## Accounts and decisions needed for a full marketplace
 
 These are not required for the discovery beta. They are required if customers
-will create accounts or transact directly on Caribabe.
+will create accounts or transact directly on Go Bjoun.
 
 ### 1. Domain and customer contact
 
@@ -69,13 +69,13 @@ CLERK_SECRET_KEY
 CLERK_WEBHOOK_SIGNING_SECRET
 ```
 
-Caribabe currently saves places only on the visitor's device. Once accounts are
+Go Bjoun currently saves places only on the visitor's device. Once accounts are
 approved, add a D1 database and store users, saved places, trip plans, vendors,
 products, and consent records server-side.
 
 ### 3. Direct checkout and host payouts
 
-Only add this if Caribabe will be the marketplace or merchant of record.
+Only add this if Go Bjoun will be the marketplace or merchant of record.
 Recommended provider: Stripe Connect.
 
 ```text
@@ -87,7 +87,7 @@ STRIPE_WEBHOOK_SECRET
 Before implementation, decide and document:
 
 - Who is merchant of record.
-- Caribabe's commission and currency policy.
+- Go Bjoun's commission and currency policy.
 - Host onboarding and verification.
 - Payout timing and reserves.
 - Cancellation, refund, chargeback, and dispute ownership.

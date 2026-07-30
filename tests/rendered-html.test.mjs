@@ -9,7 +9,7 @@ async function render() {
 
   return worker.fetch(
     new Request("http://localhost/", {
-      headers: { accept: "text/html", host: "caribabe.travel" },
+      headers: { accept: "text/html", host: "bjoun.com" },
     }),
     {
       ASSETS: {
@@ -23,14 +23,14 @@ async function render() {
   );
 }
 
-test("server-renders Caribabe's public discovery experience", async () => {
+test("server-renders Go Bjoun's public discovery experience", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
 
   const html = await response.text();
-  assert.match(html, /<title>Caribabe — The Caribbean, considered<\/title>/i);
-  assert.match(html, /CARIBABE/);
+  assert.match(html, /<title>Go Bjoun — Where will you go\?<\/title>/i);
+  assert.match(html, /Go Bjoun/);
   assert.match(html, /Community-mapped Jamaica/);
   assert.match(html, /Partner experience previews/);
   assert.match(html, /OpenStreetMap contributors/);
@@ -60,8 +60,8 @@ test("ships a curated, attributed and refreshable Jamaica catalogue", async () =
   assert.match(map, /tiles\.openfreemap\.org\/styles\/liberty/);
   assert.match(page, /jamaica-locations\.json/);
   assert.match(page, /OpenStreetMap contributors/);
-  assert.match(page, /caribabe:saved-places/);
-  assert.match(layout, /Caribabe — The Caribbean, considered/);
+  assert.match(page, /go-bjoun:saved-places/);
+  assert.match(layout, /Go Bjoun — Where will you go\?/);
   assert.match(packageText, /"data:refresh"/);
   assert.match(packageText, /"maplibre-gl"/);
 });

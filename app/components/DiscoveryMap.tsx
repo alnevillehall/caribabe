@@ -109,7 +109,7 @@ export function DiscoveryMap({
         );
 
         map.on("load", () => {
-          map.addSource("caribabe-places", {
+          map.addSource("go-bjoun-places", {
             type: "geojson",
             data: toGeoJson(placesRef.current),
             cluster: true,
@@ -120,7 +120,7 @@ export function DiscoveryMap({
           map.addLayer({
             id: "place-clusters",
             type: "circle",
-            source: "caribabe-places",
+            source: "go-bjoun-places",
             filter: ["has", "point_count"],
             paint: {
               "circle-color": "#075d78",
@@ -141,7 +141,7 @@ export function DiscoveryMap({
           map.addLayer({
             id: "place-cluster-count",
             type: "symbol",
-            source: "caribabe-places",
+            source: "go-bjoun-places",
             filter: ["has", "point_count"],
             layout: {
               "text-field": ["get", "point_count_abbreviated"],
@@ -156,7 +156,7 @@ export function DiscoveryMap({
           map.addLayer({
             id: "places-unclustered",
             type: "circle",
-            source: "caribabe-places",
+            source: "go-bjoun-places",
             filter: ["!", ["has", "point_count"]],
             paint: {
               "circle-color": [
@@ -195,7 +195,7 @@ export function DiscoveryMap({
             const coordinates = (
               feature?.geometry as { coordinates?: number[] } | undefined
             )?.coordinates;
-            const source = map.getSource("caribabe-places") as GeoJSONSource;
+            const source = map.getSource("go-bjoun-places") as GeoJSONSource;
             if (!source || !coordinates || Number.isNaN(clusterId)) return;
             const zoom = await source.getClusterExpansionZoom(clusterId);
             map.easeTo({
@@ -240,7 +240,7 @@ export function DiscoveryMap({
   }, []);
 
   useEffect(() => {
-    const source = mapRef.current?.getSource("caribabe-places") as
+    const source = mapRef.current?.getSource("go-bjoun-places") as
       | GeoJSONSource
       | undefined;
     source?.setData(toGeoJson(places));
