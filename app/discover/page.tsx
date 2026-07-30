@@ -59,7 +59,6 @@ export default function DiscoverPage() {
   const {
     savedPlaceIds,
     savedExperienceIds,
-    savedExperienceIds,
     togglePlace,
     toggleExperience,
   } = useDemoStore();
@@ -122,8 +121,6 @@ export default function DiscoverPage() {
     togglePlace(place);
     setToast(wasSaved ? "Removed from saved places" : `${place.name} saved`);
   };
-
-
 
   return (
     <DemoShell
@@ -215,7 +212,6 @@ export default function DiscoverPage() {
                     <span>{area.highlights.join(" · ")}</span>
                   </button>
                 </div>
-
               </article>
             ))}
           </section>
@@ -259,7 +255,6 @@ export default function DiscoverPage() {
                   <span>{experience.duration} · {experience.tag}</span>
                 </div>
                 <div className="trip-experience-actions">
-
                   <button
                     type="button"
                     className={`demo-save ${saved ? "saved" : ""}`}
@@ -333,7 +328,6 @@ export default function DiscoverPage() {
         </section>
       ) : null}
 
-
       <AnimatePresence>
         {selectedArea ? (
           <motion.div
@@ -370,7 +364,6 @@ export default function DiscoverPage() {
                 <p>{selectedArea.foodMoment}</p>
               </div>
               <div className="demo-drawer-actions">
-
                 <a className="demo-secondary" href={selectedArea.sourceUrl} target="_blank" rel="noreferrer">
                   Source <ExternalLink size={16} />
                 </a>

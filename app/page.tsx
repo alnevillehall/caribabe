@@ -77,7 +77,6 @@ const categories: { label: string; icon: LucideIcon }[] = [
   { label: "Events", icon: Music2 },
   { label: "Stay", icon: Hotel },
   { label: "Adventure", icon: Mountain },
-  { label: "Rentals", icon: Car },
 ];
 
 const destinations = [
@@ -208,14 +207,12 @@ function BrandLogo({ light = false }: { light?: boolean }) {
   );
 }
 
-
 export default function Home() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("For you");
   const [saved, setSaved] = useState<Set<number>>(new Set([2]));
   const [savedPlaces, setSavedPlaces] = useState<Set<string>>(new Set());
   const [searchOpen, setSearchOpen] = useState(false);
-  const [tripOpen, setTripOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"map" | "list">("map");
   const [placeCategory, setPlaceCategory] =
@@ -273,7 +270,6 @@ export default function Home() {
 
   const overlayOpen =
     searchOpen ||
-    tripOpen ||
     Boolean(activeExperience) ||
     Boolean(selectedPlace);
 
@@ -325,7 +321,6 @@ export default function Home() {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setSearchOpen(false);
-        setTripOpen(false);
         setActiveExperience(null);
         setSelectedPlace(null);
       }
@@ -857,8 +852,6 @@ export default function Home() {
         </div>
       </section>
 
-
-
       <footer>
         <div className="footer-top page-shell">
           <div>
@@ -1234,8 +1227,6 @@ export default function Home() {
             </motion.div>
           </motion.div>
         )}
-
-
 
         {toast && (
           <motion.div

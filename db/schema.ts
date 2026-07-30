@@ -17,5 +17,5 @@ export const experiences = pgTable("experience", {
   photos: text("photos").array(), // URLs from Vercel Blob
   lat: text("lat"),
   lon: text("lon"),
-  createdAt: timestamp("createdAt").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
 });
