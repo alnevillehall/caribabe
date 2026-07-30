@@ -116,7 +116,7 @@ export default function AuthClient() {
           {[
             "See saved places and experiences",
             "Build and revisit island itineraries",
-            "Complete simulated bookings",
+            "Keep food and experience ideas together",
             "Keep profile and travel preferences",
           ].map((item) => (
             <span key={item}>

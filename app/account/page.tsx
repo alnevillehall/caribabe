@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  CalendarDays,
-  Check,
-  Heart,
-  LogOut,
-  MapPin,
-  Plane,
-  Save,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, Heart, LogOut, MapPin, Plane, Save, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { DemoShell } from "../components/DemoShell";
@@ -39,22 +29,11 @@ function ProfileForm({
 
   return (
     <form onSubmit={saveProfile}>
-      <label>
-        <span>Name</span>
-        <input value={name} onChange={(event) => setName(event.target.value)} />
-      </label>
-      <label>
-        <span>Email</span>
-        <input value={user.email} disabled />
-      </label>
+      <label><span>Name</span><input value={name} onChange={(event) => setName(event.target.value)} /></label>
+      <label><span>Email</span><input value={user.email} disabled /></label>
       <label>
         <span>Home airport</span>
-        <input
-          value={airport}
-          onChange={(event) =>
-            setAirport(event.target.value.toUpperCase().slice(0, 3))
-          }
-        />
+        <input value={airport} onChange={(event) => setAirport(event.target.value.toUpperCase().slice(0, 3))} />
       </label>
       <label>
         <span>Travel style</span>
@@ -66,9 +45,7 @@ function ProfileForm({
           <option>Night owl</option>
         </select>
       </label>
-      <button type="submit" className="demo-primary">
-        <Save size={16} /> Save profile
-      </button>
+      <button type="submit" className="demo-primary"><Save size={16} /> Save profile</button>
     </form>
   );
 }
@@ -77,9 +54,9 @@ export default function AccountPage() {
   const {
     ready,
     user,
-    bookings,
     trips,
     savedPlaceIds,
+    savedExperienceIds,
     updateUser,
     signOut,
   } = useDemoStore();
@@ -92,14 +69,12 @@ export default function AccountPage() {
       <DemoShell
         eyebrow="Your account"
         title="Your passport is one tap away."
-        intro="Sign in locally to see demo bookings, trips, saves, and preferences."
+        intro="Sign in locally to keep your trip ideas, saves, and travel preferences together."
       >
         <section className="demo-empty">
           <UserRound size={31} />
           <h2>Sign in to continue</h2>
-          <Link href="/auth" className="demo-primary">
-            Open my passport <ArrowRight size={17} />
-          </Link>
+          <Link href="/auth" className="demo-primary">Open my passport <ArrowRight size={17} /></Link>
         </section>
       </DemoShell>
     );
@@ -109,7 +84,7 @@ export default function AccountPage() {
     <DemoShell
       eyebrow="Your island passport"
       title={`Welcome back, ${user.name.split(" ")[0]}.`}
-      intro="Your demo travel life, all in one place."
+      intro="Your trip ideas, local saves, and planning preferences in one place."
       actions={
         <button
           type="button"
@@ -124,86 +99,41 @@ export default function AccountPage() {
       }
     >
       <section className="account-stats">
-        <Link href="/saved">
-          <Heart size={20} />
-          <strong>{savedPlaceIds.length}</strong>
-          <span>Saved places</span>
-        </Link>
-        <Link href="/trips">
-          <Plane size={20} />
-          <strong>{trips.length}</strong>
-          <span>Island trips</span>
-        </Link>
-        <div>
-          <CalendarDays size={20} />
-          <strong>{bookings.length}</strong>
-          <span>Demo bookings</span>
-        </div>
+        <Link href="/saved"><Heart size={20} /><strong>{savedPlaceIds.length}</strong><span>Saved places</span></Link>
+        <Link href="/trips"><Plane size={20} /><strong>{trips.length}</strong><span>Island trips</span></Link>
+        <Link href="/saved"><Heart size={20} /><strong>{savedExperienceIds.length}</strong><span>Saved experiences</span></Link>
       </section>
 
       <section className="account-grid">
         <div className="account-card">
           <p className="demo-eyebrow">Profile</p>
           <h2>Travel preferences</h2>
-          <ProfileForm
-            key={user.email}
-            user={user}
-            updateUser={updateUser}
-            onSaved={() => setToast("Profile saved on this device")}
-          />
+          <ProfileForm key={user.email} user={user} updateUser={updateUser} onSaved={() => setToast("Profile saved on this device")} />
         </div>
-
         <div className="account-card">
-          <p className="demo-eyebrow">Bookings</p>
-          <h2>Upcoming experiences</h2>
-          {bookings.length > 0 ? (
-            bookings.map((booking) => (
-              <article className="account-booking" key={booking.id}>
-                <span><Check size={17} /></span>
-                <div>
-                  <small>{booking.status} · {booking.id}</small>
-                  <strong>{booking.title}</strong>
-                  <p>
-                    <CalendarDays size={13} /> {new Date(`${booking.date}T12:00:00`).toLocaleDateString()}
-                    {" · "}{booking.guests} travellers
-                  </p>
-                </div>
-                <b>${booking.total}</b>
-              </article>
-            ))
-          ) : (
-            <div className="account-empty">
-              <CalendarDays size={24} />
-              <p>No demo bookings yet.</p>
-              <Link href="/discover">Find an experience</Link>
-            </div>
-          )}
+          <p className="demo-eyebrow">Trip pulse</p>
+          <h2>Build before you book.</h2>
+          <div className="account-empty">
+            <Plane size={24} />
+            <p>Save the areas and food moments that make a trip feel like yours.</p>
+            <Link href="/discover">Find your next idea</Link>
+          </div>
         </div>
       </section>
 
       <section className="demo-section">
         <div className="demo-section-heading">
-          <div>
-            <p className="demo-eyebrow">Trips</p>
-            <h2>Your island plans</h2>
-          </div>
+          <div><p className="demo-eyebrow">Trips</p><h2>Your island plans</h2></div>
           <Link href="/trips">Open trip studio <ArrowRight size={16} /></Link>
         </div>
         <div className="account-trip-grid">
           {trips.length > 0 ? trips.map((trip) => (
             <Link href="/trips" key={trip.id}>
-              <Plane size={19} />
-              <small>{trip.island}</small>
-              <strong>{trip.name}</strong>
+              <Plane size={19} /><small>{trip.island}</small><strong>{trip.name}</strong>
               <span><MapPin size={13} /> {trip.items.length} stops · {trip.dates}</span>
             </Link>
           )) : (
-            <Link href="/trips">
-              <Plane size={19} />
-              <small>Start here</small>
-              <strong>Build your first island plan</strong>
-              <span>Open the trip studio</span>
-            </Link>
+            <Link href="/trips"><Plane size={19} /><small>Start here</small><strong>Build your first island plan</strong><span>Open the trip studio</span></Link>
           )}
         </div>
       </section>

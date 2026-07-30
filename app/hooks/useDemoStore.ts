@@ -5,7 +5,6 @@ import type { LocationPlace } from "../components/DiscoveryMap";
 import {
   starterTrip,
   storageKeys,
-  type DemoBooking,
   type DemoTrip,
   type DemoUser,
   type PartnerProfile,
@@ -37,7 +36,6 @@ export function useDemoStore() {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [savedPlaceIds, setSavedPlaceIds] = useState<string[]>([]);
   const [savedExperienceIds, setSavedExperienceIds] = useState<number[]>([]);
-  const [bookings, setBookings] = useState<DemoBooking[]>([]);
   const [trips, setTrips] = useState<DemoTrip[]>([]);
   const [partner, setPartner] = useState<PartnerProfile | null>(null);
 
@@ -45,7 +43,6 @@ export function useDemoStore() {
     setUser(readJson<DemoUser | null>(storageKeys.user, null));
     setSavedPlaceIds(readJson<string[]>(storageKeys.places, []));
     setSavedExperienceIds(readJson<number[]>(storageKeys.experiences, []));
-    setBookings(readJson<DemoBooking[]>(storageKeys.bookings, []));
     setTrips(readJson<DemoTrip[]>(storageKeys.trips, []));
     setPartner(readJson<PartnerProfile | null>(storageKeys.partner, null));
     setReady(true);
@@ -105,12 +102,6 @@ export function useDemoStore() {
     setSavedExperienceIds(next);
   };
 
-  const addBooking = (booking: DemoBooking) => {
-    const next = [booking, ...bookings];
-    writeJson(storageKeys.bookings, next);
-    setBookings(next);
-  };
-
   const saveTrip = (trip: DemoTrip) => {
     const next = [trip, ...trips.filter((item) => item.id !== trip.id)];
     writeJson(storageKeys.trips, next);
@@ -136,7 +127,6 @@ export function useDemoStore() {
     user,
     savedPlaceIds,
     savedExperienceIds,
-    bookings,
     trips,
     partner,
     signIn,
@@ -144,7 +134,6 @@ export function useDemoStore() {
     signOut,
     togglePlace,
     toggleExperience,
-    addBooking,
     saveTrip,
     ensureStarterTrip,
     savePartner,

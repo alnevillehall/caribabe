@@ -118,9 +118,9 @@ export default function SavedPage() {
                 </div>
                 <small>{experience.location}</small>
                 <h3>{experience.title}</h3>
-                <p>From ${experience.price} · {experience.duration}</p>
+                <p>{experience.category} · {experience.duration}</p>
                 <div>
-                  <Link href={`/booking?experience=${experience.id}`}>Book demo</Link>
+                  <Link href="/trips">Plan it</Link>
                   <button type="button" onClick={() => toggleExperience(experience.id)}>
                     <Trash2 size={15} /> Remove
                   </button>

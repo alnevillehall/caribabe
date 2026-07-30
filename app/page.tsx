@@ -5,12 +5,9 @@ import {
   ArrowRight,
   ArrowUpRight,
   Bookmark,
-  CalendarDays,
-  Car,
   Check,
   ChevronRight,
   Clock3,
-  CloudSun,
   Compass,
   ExternalLink,
   Globe2,
@@ -23,17 +20,13 @@ import {
   Mountain,
   Music2,
   Navigation,
-  Plane,
   Phone,
-  Plus,
   Search,
   SlidersHorizontal,
   Sparkles,
   SunMedium,
   UserRound,
-  Users,
   Utensils,
-  WalletCards,
   Waves,
   X,
 } from "lucide-react";
@@ -53,7 +46,6 @@ type Experience = {
   location: string;
   image: string;
   duration: string;
-  price: number;
   tag: string;
   description: string;
 };
@@ -103,7 +95,7 @@ const destinations = [
     count: "Guide coming next",
     image: "/images/st-lucia.jpg",
     className: "destination-lucia",
-    live: false,
+    live: true,
   },
   {
     name: "Barbados",
@@ -111,7 +103,7 @@ const destinations = [
     count: "Guide coming next",
     image: "/images/barbados.jpg",
     className: "destination-barbados",
-    live: false,
+    live: true,
   },
   {
     name: "Curaçao",
@@ -119,7 +111,7 @@ const destinations = [
     count: "Guide coming next",
     image: "/images/jamaica.jpg",
     className: "destination-curacao",
-    live: false,
+    live: true,
   },
 ];
 
@@ -130,8 +122,7 @@ const experiences: Experience[] = [
     location: "Montego Bay, Jamaica",
     image: "/images/catamaran.jpg",
     duration: "3.5 hours",
-    price: 125,
-    tag: "Partner preview",
+    tag: "Trip idea",
     description:
       "Sail beyond the shoreline with a small local crew, swim in a quiet cove, and watch the sky turn coral over the Caribbean.",
   },
@@ -141,8 +132,7 @@ const experiences: Experience[] = [
     location: "Roseau, Dominica",
     image: "/images/waterfall.jpg",
     duration: "5 hours",
-    price: 98,
-    tag: "Partner preview",
+    tag: "Trip idea",
     description:
       "Follow a naturalist through rainforest trails to a secluded swimming hole, then share a seasonal Dominican lunch in the forest.",
   },
@@ -152,8 +142,7 @@ const experiences: Experience[] = [
     location: "Soufrière, Saint Lucia",
     image: "/images/villa.jpg",
     duration: "2.5 hours",
-    price: 170,
-    tag: "Concept preview",
+    tag: "Trip idea",
     description:
       "A private, open-air dinner shaped by island ingredients, a chef’s tasting menu, and an uninterrupted sea view.",
   },
@@ -219,26 +208,6 @@ function BrandLogo({ light = false }: { light?: boolean }) {
   );
 }
 
-const itinerary = [
-  {
-    time: "09:30",
-    label: "Morning",
-    title: "Blue Mountain coffee trail",
-    detail: "2 hr 30 min · suggested",
-  },
-  {
-    time: "13:00",
-    label: "Afternoon",
-    title: "Lunch at Stush in the Bush",
-    detail: "1 hr 45 min · reserve before travel",
-  },
-  {
-    time: "17:30",
-    label: "Evening",
-    title: "Catamaran into golden hour",
-    detail: "3 hr 30 min · travel time estimate",
-  },
-];
 
 export default function Home() {
   const router = useRouter();
@@ -429,15 +398,8 @@ export default function Home() {
     }
   };
 
-  const exploreDestination = (name: string, live: boolean) => {
-    if (!live) {
-      notify(`${name} is on the Go Bjoun roadmap`);
-      return;
-    }
-    setPlaceCategory("All");
-    document
-      .getElementById("nearby")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const exploreDestination = () => {
+    router.push("/discover");
   };
 
   return (
@@ -461,7 +423,6 @@ export default function Home() {
 
           <nav className="desktop-nav" aria-label="Primary navigation">
             <Link href="/discover">Discover</Link>
-            <Link href="/trips">Plan a trip</Link>
             <a href="#nearby">Near me</a>
             <Link href="/journal">Stories</Link>
           </nav>
@@ -523,25 +484,10 @@ export default function Home() {
             className="search-segment location-segment"
             type="button"
             onClick={() => setSearchOpen(true)}
+            style={{ flex: 1 }}
           >
             <span>Where</span>
             <strong>Choose an island</strong>
-          </button>
-          <button
-            className="search-segment"
-            type="button"
-            onClick={() => setSearchOpen(true)}
-          >
-            <span>When</span>
-            <strong>Add dates</strong>
-          </button>
-          <button
-            className="search-segment"
-            type="button"
-            onClick={() => setSearchOpen(true)}
-          >
-            <span>Who</span>
-            <strong>2 travellers</strong>
           </button>
           <button
             className="search-submit"
@@ -618,9 +564,7 @@ export default function Home() {
               type="button"
               className={`destination-card ${destination.className}`}
               key={destination.name}
-              onClick={() =>
-                exploreDestination(destination.name, destination.live)
-              }
+              onClick={exploreDestination}
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
@@ -654,8 +598,8 @@ export default function Home() {
               <p className="eyebrow">Partner experience previews</p>
               <h2>Worth leaving the beach for.</h2>
               <p className="section-disclaimer">
-                Preview the complete demo journey, including a smooth simulated
-                checkout. No reservation or charge is made.
+                Save the ideas with a pulse. Booking will come later; this is
+                the space for finding the trip before you commit to it.
               </p>
             </div>
             <button className="quiet-link" type="button" onClick={() => router.push("/discover")}>
@@ -714,15 +658,10 @@ export default function Home() {
                   </span>
                   <strong>{experience.title}</strong>
                   <span className="experience-details">
-                    <span>
-                      <Sparkles size={14} /> Partner preview
-                    </span>
+                    <span><Sparkles size={14} /> Trip idea</span>
                     <span>
                       <Clock3 size={14} /> {experience.duration}
                     </span>
-                  </span>
-                  <span className="experience-price">
-                    Indicative from <b>${experience.price}</b> / person
                   </span>
                 </button>
               </motion.article>
@@ -918,54 +857,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="planner-section page-shell" id="trips">
-        <div className="planner-panel">
-          <div className="planner-orbit" aria-hidden="true">
-            <span className="orbit-ring ring-one" />
-            <span className="orbit-ring ring-two" />
-            <span className="orbit-dot dot-one" />
-            <span className="orbit-dot dot-two" />
-            <Plane size={32} />
-          </div>
-          <div className="planner-copy">
-            <p className="eyebrow light">One beautiful plan</p>
-            <h2>Dream it. We&apos;ll make the days fit.</h2>
-            <p>
-              Save places, shape an itinerary, track your budget, and keep
-              every reservation together.
-            </p>
-            <button
-              type="button"
-              className="light-button"
-              onClick={() => router.push("/trips")}
-            >
-              Build a trip <Plus size={18} />
-            </button>
-          </div>
-          <div className="planner-preview">
-            <div className="preview-header">
-              <span>
-                <small>Your next chapter</small>
-                <strong>Jamaica · 6 days</strong>
-              </span>
-              <div className="avatar-stack" aria-label="2 travellers">
-                <span>AM</span>
-                <span>JL</span>
-              </div>
-            </div>
-            {itinerary.slice(0, 2).map((item) => (
-              <div className="preview-item" key={item.time}>
-                <span className="preview-time">{item.time}</span>
-                <span>
-                  <small>{item.label}</small>
-                  <strong>{item.title}</strong>
-                </span>
-                <Check size={17} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+
 
       <footer>
         <div className="footer-top page-shell">
@@ -1010,14 +902,6 @@ export default function Home() {
           <Compass size={20} />
           <span>Explore</span>
         </a>
-        <Link href="/trips">
-          <Plane size={20} />
-          <span>Trips</span>
-        </Link>
-        <Link href="/account">
-          <CalendarDays size={20} />
-          <span>Bookings</span>
-        </Link>
         <Link href="/saved">
           <Bookmark size={20} />
           <span>Saved</span>
@@ -1316,7 +1200,7 @@ export default function Home() {
                   <h2>{activeExperience.title}</h2>
                   <div className="detail-rating">
                     <span>
-                      <Sparkles size={15} /> Partner preview
+                      <Sparkles size={15} /> Trip idea
                     </span>
                     <span>
                       <Clock3 size={15} /> {activeExperience.duration}
@@ -1332,138 +1216,26 @@ export default function Home() {
                       <Check size={16} /> Local host verification required
                     </span>
                     <span>
-                      <Check size={16} /> Final terms published before booking
+                      <Check size={16} /> A good place to build a day around
                     </span>
                   </div>
                 </div>
-                <aside className="booking-card">
-                  <span>
-                    Indicative from <strong>${activeExperience.price}</strong> /
-                    person
-                  </span>
-                  <div className="booking-field">
-                    <CalendarDays size={18} />
-                    <span>
-                      <small>Date</small>
-                      <strong>Choose during checkout</strong>
-                    </span>
-                  </div>
-                  <div className="booking-field">
-                    <Users size={18} />
-                    <span>
-                      <small>Guests</small>
-                      <strong>Set during booking</strong>
-                    </span>
-                  </div>
+                <aside className="trip-action-card">
+                  <span>Keep it in mind for your next island plan.</span>
                   <button
                     type="button"
-                    className="primary-book-button"
-                    onClick={() => {
-                      const experienceId = activeExperience.id;
-                      setActiveExperience(null);
-                      router.push(`/booking?experience=${experienceId}`);
-                    }}
+                    className="secondary-trip-action"
+                    onClick={() => toggleSaved(activeExperience.id)}
                   >
-                    Continue to demo booking <ArrowRight size={18} />
+                    <Heart size={16} /> {saved.has(activeExperience.id) ? "Saved" : "Save this idea"}
                   </button>
-                  <small>No reservation or charge is being made.</small>
                 </aside>
               </div>
             </motion.div>
           </motion.div>
         )}
 
-        {tripOpen && (
-          <motion.div
-            className="drawer-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Jamaica trip plan"
-            onClick={() => setTripOpen(false)}
-          >
-            <motion.aside
-              className="trip-drawer"
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 250 }}
-              onClick={(event) => event.stopPropagation()}
-            >
-              <div className="drawer-top">
-                <span>
-                  <small>Aug 12–18 · 2 travellers</small>
-                  <strong>Jamaica in colour</strong>
-                </span>
-                <button
-                  type="button"
-                  className="modal-close"
-                  onClick={() => setTripOpen(false)}
-                  aria-label="Close trip"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-              <div className="trip-summary">
-                <span>
-                  <CloudSun size={20} />
-                  <small>Weather</small>
-                  <strong>29° · bright</strong>
-                </span>
-                <span>
-                  <WalletCards size={20} />
-                  <small>Budget</small>
-                  <strong>$1,240 left</strong>
-                </span>
-                <span>
-                  <Navigation size={20} />
-                  <small>Driving</small>
-                  <strong>1 hr 22 min</strong>
-                </span>
-              </div>
-              <div className="drawer-day">
-                <div className="drawer-day-heading">
-                  <span>
-                    <small>Day three</small>
-                    <strong>Friday, August 14</strong>
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Add to day"
-                    onClick={() => notify("A new moment was added to Friday")}
-                  >
-                    <Plus size={18} />
-                  </button>
-                </div>
-                {itinerary.map((item, index) => (
-                  <article className="itinerary-item" key={item.time}>
-                    <span className="itinerary-line">
-                      <b>{item.time}</b>
-                      {index < itinerary.length - 1 && <i />}
-                    </span>
-                    <span className="itinerary-card">
-                      <small>{item.label}</small>
-                      <strong>{item.title}</strong>
-                      <span>{item.detail}</span>
-                    </span>
-                  </article>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="drawer-cta"
-                onClick={() => {
-                  setTripOpen(false);
-                  router.push("/trips");
-                }}
-              >
-                View full itinerary <ArrowRight size={18} />
-              </button>
-            </motion.aside>
-          </motion.div>
-        )}
+
 
         {toast && (
           <motion.div

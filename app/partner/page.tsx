@@ -50,7 +50,7 @@ export default function PartnerPage() {
       <DemoShell
         eyebrow="Partner studio"
         title={`Welcome, ${profile.businessName}.`}
-        intro="A working host-dashboard demo for listings, reach, bookings, and payouts."
+        intro="A working host-dashboard demo for listings, reach, and trip-planning interest."
         actions={
           <button
             type="button"
@@ -69,8 +69,8 @@ export default function PartnerPage() {
           {[
             { icon: Eye, value: "1,248", label: "Listing views" },
             { icon: Users, value: "86", label: "Saves" },
-            { icon: BarChart3, value: "12", label: "Demo bookings" },
-            { icon: CircleDollarSign, value: "$1,440", label: "Demo revenue" },
+            { icon: BarChart3, value: "12", label: "Trip adds" },
+            { icon: CircleDollarSign, value: "74%", label: "Planning fit" },
           ].map(({ icon: Icon, value, label }) => (
             <article key={label}>
               <Icon size={20} />
@@ -102,7 +102,7 @@ export default function PartnerPage() {
               ["Contact verified", true],
               ["Listing description", true],
               ["Upload rights-cleared photos", false],
-              ["Connect payouts", false],
+              ["Add food and experience tags", false],
             ].map(([label, done]) => (
               <span key={String(label)} className={done ? "done" : ""}>
                 <b>{done ? <Check size={13} /> : null}</b>
@@ -150,7 +150,7 @@ export default function PartnerPage() {
                   <span className="demo-status">
                     <Check size={14} /> Demo verified
                   </span>
-                  <strong>From $85 / guest</strong>
+                  <strong>Trip-ready idea</strong>
                 </div>
                 <button
                   type="button"
@@ -183,7 +183,7 @@ export default function PartnerPage() {
           <h2>Discovery built around local character.</h2>
           {[
             "A richer profile than a pin on a map",
-            "Transparent demo booking and payout tools",
+            "Trip-planning tools that put your local character first",
             "Traveller saves and trip-plan visibility",
             "A correction and verification workflow",
           ].map((item) => (
